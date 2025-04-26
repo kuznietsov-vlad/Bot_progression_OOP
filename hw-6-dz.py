@@ -111,10 +111,11 @@ try:
     print(book)
 #find
     vlad = book.find_record("Vlados")
-    vlad.edit_phone('0635901191', '5555555555')
+    vlad.edit_phone('0000000000', '5555555555')
     vlados_record.add_phone('1111111111')
     vlad.edit_phone('1111111111', '5555555555')
     print(book)
+    print(vlad)
 
 except ValueError:
     print('Please write correct number')
