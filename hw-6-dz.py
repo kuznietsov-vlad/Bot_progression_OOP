@@ -1,4 +1,5 @@
 from collections import UserDict
+from dis import findlabels
 
 
 class Field:
@@ -19,6 +20,8 @@ class Phone(Field):
             raise ValueError('Phone is too short')
         elif len(phone) > 10:
             raise ValueError('Phone is too long')
+        elif not phone.isdigit():
+            raise ValueError('Please write correct number, only numbers')
         super().__init__(phone)
 
 
@@ -33,11 +36,9 @@ class Record:
                 return phone
 
     def add_phone(self, phone):
-        if phone.isdigit():
-            phone_obj = Phone(phone)
-            self.phones.append(phone_obj)
-        else:
-            print('Write correct phone please: ')
+        phone_obj = Phone(phone)
+        self.phones.append(phone_obj)
+
 
     def show_phones(self):
         return [phone.value for phone in self.phones]
@@ -49,19 +50,15 @@ class Record:
         else:
             print(f"don't find number {phone} in {self.show_phones()}")
 
-    def edit_phone(self, old_numb: str, new_numb: str):
-        if not (old_numb.isdigit() and new_numb.isdigit()):
-            raise ValueError(f"Can't find number {old_numb} in {self.show_phones()}")
-        if not new_numb in [phone.value for phone in self.phones]:
+    def edit_phone(self, old_numb: str, new_numb: str)-> None:
+        if not self.find_phone(new_numb):
             if old_numb == new_numb:
-                print('Please write a new number different from the old one')
-            old_phone_find = self.find_phone(old_numb)
-            if old_phone_find:
-                self.phones[self.phones.index(old_phone_find)] = Phone(new_numb)
+               print('Please write a new number different from the old one')
+            if self.find_phone(old_numb):
+                self.phones[self.phones.index(self.find_phone(old_numb))] = Phone(new_numb)
                 print(f"Number {old_numb} successfully changed to {new_numb}")
-
             else:
-                print(f"Can't find number {old_numb} in {self.show_phones()}")
+               raise  ValueError(f"Can't find number {old_numb} in {self.show_phones()}")
         else:
             print(f'Number "{old_numb}" was added previously')
 
@@ -70,18 +67,21 @@ class Record:
 
 
 class AddressBook(UserDict):
-    def add_record(self, record):
+    def add_record(self, record) -> None:
         self.data[record.name.value] = record
 
-    def find_record(self, name: str):
-        return self.data.get(name)
-
-    def delete_record(self, name: str):
+    def find(self, name: str):
         if name in self.data:
+            return self.data.get(name)
+        else:
+            raise ValueError('Name not found')
+
+    def delete(self, name: str)->None:
+        if self.find(name):
             self.data.pop(name)
             print(f"Name '{name}' deleted successfully.")
         else:
-            print(f"Name '{name}' not found.")
+            raise ValueError(f"Name '{name}' not found.")
 
     def __str__(self):
         return (f'\n=========Address book contacts========== \n'
@@ -90,32 +90,30 @@ class AddressBook(UserDict):
 
 
 
-try:
-    print("_________________Test_____________________")
+print("_________________Test_____________________")
 #__init__
-    john_record = Record('John')
-    daria_record = Record('Daria')
-    vlados_record = Record('Vlados')
+john_record = Record('John')
+daria_record = Record('Daria')
+vlados_record = Record('Vlados')
 #__add_phone__
-    john_record.add_phone('1234567890')
-    vlados_record.add_phone('1234567890')
-    daria_record.add_phone('1234567890')
+john_record.add_phone('1234567891')
+vlados_record.add_phone('1234567892')
+daria_record.add_phone('1234567893')
 # output
-    book = AddressBook()
-    book.add_record(john_record)
-    book.add_record(daria_record)
-    book.add_record(vlados_record)
-    print(book)
+book = AddressBook()
+book.add_record(john_record)
+book.add_record(daria_record)
+book.add_record(vlados_record)
+print(book)
 #delete
-    book.delete_record(john_record.name)
-    print(book)
+book.delete('John')
+print(book)
 #find
-    vlad = book.find_record("Vlados")
-    vlad.edit_phone('0000000000', '5555555555')
-    vlados_record.add_phone('1111111111')
-    vlad.edit_phone('1111111111', '5555555555')
-    print(book)
-    print(vlad)
+vlad = book.find("Vlados")
+vlad.edit_phone('1234567892', '5555555555')
+vlados_record.add_phone('1111111111')
+vlad.edit_phone('1111111111', '5555555555')
+print(book)
+print(vlad)
 
-except ValueError:
-    print('Please write correct number')
+
